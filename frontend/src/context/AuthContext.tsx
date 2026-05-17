@@ -28,6 +28,7 @@ const setCookie = (name: string, value: string, days = 30) => {
 
 // Helper to delete cookie client-side
 const deleteCookie = (name: string) => {
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
   document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax; Secure`;
 };
 
@@ -53,7 +54,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const storedToken = getCookie('token');
     const storedUser = localStorage.getItem('user');
 
-    if (storedToken && storedUser) {
+    if (storedToken && storedToken !== 'undefined' && storedToken !== 'null' && storedUser) {
       setToken(storedToken);
       try {
         setUser(JSON.parse(storedUser));
@@ -62,6 +63,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.removeItem('user');
         deleteCookie('token');
       }
+    } else {
+      // Clear asymmetric or missing session data
+      localStorage.removeItem('user');
+      deleteCookie('token');
     }
     setLoading(false);
   }, []);
